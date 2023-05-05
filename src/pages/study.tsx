@@ -4,6 +4,8 @@ import {useNote, useNoteDelete, useNoteInsert, useNotes, useNoteUpdate} from "@/
 import {Note, NoteInsert} from "@/hooks";
 import {ContainerOutlined, DeleteOutlined, EditOutlined, EllipsisOutlined} from "@ant-design/icons";
 import {createEmptyNote, getNoteType, NoteType} from "@/models/notes/utils";
+import {BottomMenu} from "@/components/BottomMenu";
+import {TopMenu} from "@/components/TopMenu";
 
 
 const StudyPage = () => {
@@ -44,64 +46,7 @@ export const NoteContent = ({note, showAnswer, setShowAnswer}:{note?:Note, showA
   )
 }
 
-export const TopMenu = ({note}:{note: Note}) => {
-  const [newOpen, setNewOpen] = useState(false)
-  const [editOpen, setEditOpen] = useState(false)
-  const [editNoteId, setEditNoteId] = useState(0)
-  const {mutate: update} = useNoteUpdate()
-  const {mutate: del} = useNoteDelete()
 
-  const items: MenuProps['items'] = [
-    {label: 'Edit', icon: <EditOutlined/>, key: 'edit'},
-    {label: 'Archive', icon: <ContainerOutlined/>, key: 'archive'},
-    {label: 'Delete', icon: <DeleteOutlined/>, key: 'delete'},
-  ]
-  const onClick: MenuProps['onClick'] = ({key}) => {
-    console.log(`clicked on item ${key} `)
-    if(key === 'edit') {
-      setEditNoteId(note.id)
-      setEditOpen(true)
-    } else if(key === 'delete') {
-      del({id: note.id})
-    } else if (key === 'archive') {
-      update({id: note.id, archived: true})
-    }
-  }
-  const onFinish = () => {
-    setEditNoteId(0)
-  }
-  return (
-    <>
-      <div className={'flex justify-between pt-4 px-4 items-center h-[70px]'}>
-        <NoteForm noteId={0} open={newOpen} setOpen={setNewOpen} onFinish={onFinish}/>
-        <NoteForm noteId={editNoteId} open={editOpen} setOpen={setEditOpen} onFinish={onFinish}/>
-        <AddButton onClick={() => {setNewOpen(true)}}/>
-        <Dropdown menu={{items, onClick}}>
-          <EllipsisOutlined className={'text-4xl text-black cursor-pointer'}/>
-        </Dropdown>
-      </div>
-    </>
-  )
-}
-
-export const BottomMenu = ({note, showAnswer, setShowAnswer}:{note?: Note, showAnswer: boolean, setShowAnswer: (show: boolean) => void}) => {
-  const noteType:NoteType = getNoteType(note)
-  let bottomMenu = <div></div>
-  if(noteType === 'answered') {
-    bottomMenu = <FlashcardMenu onFail={() => {}} onHard={() => {}} onMedium={() => {}} onEasy={() => {}}/>
-  } else if (noteType === 'open') {
-    bottomMenu = <OpenQuestionMenu onFail={() => {}} onKnow={() => {}}/>
-  } else if (noteType === 'unprocessed') {
-    bottomMenu = <UnprocessedMenu onFail={() => {}} onKnow={() => {}} />
-  }
-  return (
-    showAnswer ? (
-        bottomMenu
-      ): (
-        <div></div>
-    )
-  )
-}
 
 export const AddButton = ({onClick}:{onClick: () => void}) => {
   return (
@@ -112,62 +57,6 @@ export const AddButton = ({onClick}:{onClick: () => void}) => {
   )
 }
 
-export const UnprocessedMenu = ({onFail, onKnow}:OpenQuestionMenuProps) => {
-  return (
-    <div className={'flex'}>
-      <div className={'bg-red-400 p-4 w-1/2 flex justify-center cursor-pointer hover:bg-red-500'}>
-        Not Sure
-      </div>
-      <div className={'bg-green-400 p-4 w-1/2 flex justify-center cursor-pointer hover:bg-green-500'}>
-        Got it!
-      </div>
-    </div>
-  )
-}
-
-interface OpenQuestionMenuProps {
-
-  onFail: () => void,
-  onKnow: () => void,
-}
-export const OpenQuestionMenu = ({onFail, onKnow}:OpenQuestionMenuProps) => {
-  return (
-    <div className={'flex'}>
-      <div className={'bg-red-400 p-4 w-1/2 flex justify-center cursor-pointer hover:bg-red-500'}>
-        Not Sure
-      </div>
-      <div className={'bg-green-400 p-4 w-1/2 flex justify-center cursor-pointer hover:bg-green-500'}>
-        Got it!
-      </div>
-    </div>
-  )
-}
-
-
-interface FlashcardMenuProps {
-  onFail: () => void,
-  onHard: () => void,
-  onMedium: () => void,
-  onEasy: () => void,
-}
-export const FlashcardMenu = ({onFail, onMedium, onHard, onEasy}:FlashcardMenuProps) => {
-  return (
-    <div className={'flex'}>
-      <div className={'p-4 flex justify-center cursor-pointer bg-red-400 hover:bg-red-500 w-1/4'}>
-        Not Sure
-      </div>
-      <div className={'p-4 flex justify-center cursor-pointer bg-orange-400 hover:bg-orange-500 w-1/4'}>
-        Hard
-      </div>
-      <div className={'p-4 flex justify-center cursor-pointer bg-green-400 hover:bg-green-500 w-1/4'}>
-        Good
-      </div>
-      <div className={'p-4 flex justify-center cursor-pointer bg-blue-400 hover:bg-blue-500 w-1/4'}>
-        Easy
-      </div>
-    </div>
-  )
-}
 
 export const NoteForm = ({noteId, onFinish, open, setOpen}:{noteId: number, onFinish?: () => void,open: boolean, setOpen: (open: boolean) => void}) => {
   const [form] = Form.useForm()
